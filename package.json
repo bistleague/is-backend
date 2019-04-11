@@ -1,0 +1,24 @@
+{
+  "name": "is-backend",
+  "version": "1.0.0",
+  "description": "Bistleague dashboard backend",
+  "main": "main.js",
+  "scripts": {
+    "start": "node main.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bistleague/is-backend.git"
+  },
+  "author": "Muhammad Aditya Hilmy, Alfian Maulana Ibrahim",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/bistleague/is-backend/issues"
+  },
+  "homepage": "https://github.com/bistleague/is-backend#readme",
+  "dependencies": {
+    "dotenv": "^7.0.0",
+    "fastify": "^2.2.0",
+    "jsonwebtoken": "^8.5.1"
+  }
+}
