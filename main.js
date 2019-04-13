@@ -4,6 +4,7 @@
  */
 
 require("dotenv").config();
+const datastore = require("./datastore/datastore");
 
 const fastify = require('fastify')({ logger: true });
 
