@@ -2,4 +2,3 @@ node_modules/
 .idea/
 .env
 bistleague-client-staging.json
-package-lock.json
