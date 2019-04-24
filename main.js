@@ -4,13 +4,16 @@
  */
 
 require("dotenv").config();
-const datastore = require("./datastore/datastore");
 
 const fastify = require('fastify')({ logger: true });
 
+fastify.register(require('fastify-jwt'), {
+    secret: process.env.JWT_SECRET
+});
+
 // Register routes
 fastify.register(require('./routes/auth'), { prefix: '/v1/auth' });
-
+fastify.register(require('./routes/user'), { prefix: '/v1/user', preValidation: [fastify.authenticate] });
 
 // Run the server!
 const start = async () => {
