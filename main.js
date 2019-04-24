@@ -13,6 +13,7 @@ fastify.register(require('fastify-jwt'), {
 
 // Register routes
 fastify.register(require('./routes/auth'), { prefix: '/v1/auth' });
+fastify.register(require('./routes/account'), { prefix: '/v1/account' });
 fastify.register(require('./routes/user'), { prefix: '/v1/user', preValidation: [fastify.authenticate] });
 
 // Run the server!

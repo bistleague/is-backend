@@ -62,13 +62,19 @@ module.exports = function (fastify, opts, next) {
             }
 
             // All is well, update profile
-            user.email = req.body.email || user.email;
             user.name = req.body.name || user.name;
             user.university = (req.body.university !== undefined) ? req.body.university : user.university;
             user.major = (req.body.major !== undefined) ? req.body.major : user.major;
             user.mobile_no = (req.body.mobile_no !== undefined) ? req.body.mobile_no : user.mobile_no;
             user.gender = (req.body.gender === User.MALE || req.body.gender === User.FEMALE) ? req.body.gender : user.gender;
 
+            // Check if email is changed. If it is, set email verified to false
+            if(req.body.email && req.body.email !== user.email) {
+                user.email = req.body.email;
+                user.email_verified = false;
+            }
+
+            // Check if password is changed. If it is, generate hash and update
             if(req.body.password) {
                 user.password_hash = bcrypt.hashSync(req.body.password, usersRepository.HASH_SALT);
             }
