@@ -49,8 +49,12 @@ module.exports = function (fastify, opts, next) {
 
             const token = fastify.jwt.sign(payload, options);
 
+            // Compute expiry
+            const exp = Math.round((new Date()).getTime() / 1000) + options.expiresIn;
+
+            // Return reply
             reply.header("Authorization", `Bearer ${token}`);
-            return {user: payload, token: token};
+            return {user: payload, token: token, expires_at: exp};
         } catch (e) {
             reply.code(500);
             console.log(e);
