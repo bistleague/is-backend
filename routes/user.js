@@ -80,9 +80,7 @@ module.exports = function (fastify, opts, next) {
             }
 
             // Update to database
-            usersRepository.update(userId, user);
-
-            delete user.password_hash;
+            await usersRepository.update(userId, user);
 
             return {success: true, user: user};
 

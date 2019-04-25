@@ -17,6 +17,10 @@ const User = require('../model/User');
  * Get user by email
  */
 exports.getByEmail = async function(email) {
+    if(!email) {
+        return;
+    }
+
     const query = db.createQuery(ENTITY_NAME)
         .filter('email', '=', email)
         .limit(1);
@@ -31,6 +35,10 @@ exports.getByEmail = async function(email) {
  * Get user by ID
  */
 exports.get = async function(id) {
+    if(!id) {
+        return;
+    }
+
     const key = db.key([ENTITY_NAME, id]);
     const user = await db.get(key);
     return user[0];
@@ -41,6 +49,10 @@ exports.get = async function(id) {
  * @param user User object
  */
 exports.add = async function(user) {
+    if(!user) {
+        return;
+    }
+
     let email = user.email;
     if(!email) throw "Invalid user object";
 

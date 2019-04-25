@@ -52,7 +52,7 @@ module.exports = function (fastify, opts, next) {
             reply.header("Authorization", `Bearer ${token}`);
             return {user: payload, token: token};
         } catch (e) {
-            reply.code(401);
+            reply.code(500);
             console.log(e);
             return {error: e.toString()}
         }
