@@ -2,5 +2,6 @@ node_modules/
 .idea/
 .env
 bistleague-client-staging.json
+bistleague-beta-deployment.json
 package-lock.json
-app.yaml
+app-staging.yaml
