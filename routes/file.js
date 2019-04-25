@@ -11,9 +11,12 @@ module.exports = function (fastify, opts, next) {
     /**
      * Get stored file
      */
-    fastify.get('/file', async (req, reply) => {
+    fastify.get('/', async (req, reply) => {
         try {
             // TODO implement
+
+            // Read login parameters
+            // const fileId = req.sub.fileId;
 
             // Get file by fileId
             let file = await filesRepository.get(fileId);
@@ -37,9 +40,10 @@ module.exports = function (fastify, opts, next) {
     /**
      * Store file to database
      */
-    fastify.put('/file', async (req, reply) => {
+    fastify.put('/', async (req, reply) => {
         try {
             // TODO implement
+
             const filename = req.body.filename;
             const url = req.body.url;
             // const key = req.body.key;
@@ -55,7 +59,7 @@ module.exports = function (fastify, opts, next) {
     /**
      * Delete stored file
      */
-    fastify.delete('/file', async (req, reply) => {
+    fastify.delete('/', async (req, reply) => {
         try {
             // TODO implement
 
