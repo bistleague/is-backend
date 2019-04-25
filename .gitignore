@@ -5,3 +5,4 @@ bistleague-client-staging.json
 bistleague-beta-deployment.json
 package-lock.json
 app-staging.yaml
+secrets.tar
