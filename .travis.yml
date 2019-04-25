@@ -1,7 +1,9 @@
 language: generic
 
 deploy:
-  provider: gae
+- provider: script
+  script: ls
+- provider: gae
   keyfile: bistleague-beta-deployment.json
   project: bist-league-beta
   config: app-staging.yaml
