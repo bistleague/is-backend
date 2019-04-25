@@ -4,5 +4,6 @@ deploy:
   project: bist-league-beta
   config: app-staging.yaml
 before_install:
-- openssl aes-256-cbc -K $encrypted_6c8cfcc0c1db_key -iv $encrypted_6c8cfcc0c1db_iv -in secrets.tar.enc -out secrets.tar -d
+- openssl aes-256-cbc -K $encrypted_6c8cfcc0c1db_key -iv $encrypted_6c8cfcc0c1db_iv
+  -in secrets.tar.enc -out secrets.tar -d
 - tar xvf secrets.tar
