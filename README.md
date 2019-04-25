@@ -3,6 +3,7 @@ BIST League 2019 information system backend
 
 ####Environment variables
 ```
+PORT=<port>
 JWT_SECRET=<insert JWT secret>
 JWT_EXPIRES_IN=<insert JWT expiration in seconds (default 3600s)>
 GCP_PROJECT_ID=<insert GCP project ID>
