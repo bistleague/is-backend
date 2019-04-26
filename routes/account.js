@@ -31,7 +31,7 @@ module.exports = function (fastify, opts, next) {
                 return {error: e.toString()}
             }
 
-            return {hello: 'world'};
+            return {success: true};
         } catch (e) {
             reply.code(500);
             console.log(e);
