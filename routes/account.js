@@ -5,6 +5,7 @@
 
 const bcrypt = require('bcrypt');
 const usersRepository = require('../datastore/users');
+const User = require('../model/User');
 
 module.exports = function (fastify, opts, next) {
     /**
@@ -16,6 +17,19 @@ module.exports = function (fastify, opts, next) {
             const name = req.body.name;
             const email = req.body.email;
             const password = req.body.password;
+
+            // Create User entity
+            // Create password hash
+            const hash = bcrypt.hashSync(password, usersRepository.HASH_SALT);
+
+            let user = new User(name, email, hash);
+
+            try {
+                usersRepository.add(user);
+            } catch (e) {
+                reply.code(400);
+                return {error: e.toString()}
+            }
 
             return {hello: 'world'};
         } catch (e) {
