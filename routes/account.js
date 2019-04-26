@@ -25,7 +25,7 @@ module.exports = function (fastify, opts, next) {
             let user = new User(name, email, hash);
 
             try {
-                usersRepository.add(user);
+                await usersRepository.add(user);
             } catch (e) {
                 reply.code(400);
                 return {error: e.toString()}
