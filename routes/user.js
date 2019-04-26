@@ -66,7 +66,7 @@ module.exports = function (fastify, opts, next) {
             user.university = (req.body.university !== undefined) ? req.body.university : user.university;
             user.major = (req.body.major !== undefined) ? req.body.major : user.major;
             user.mobile_no = (req.body.mobile_no !== undefined) ? req.body.mobile_no : user.mobile_no;
-            user.gender = (req.body.gender === User.MALE || req.body.gender === User.FEMALE) ? req.body.gender : user.gender;
+            user.gender = (req.body.gender == User.MALE || req.body.gender == User.FEMALE) ? req.body.gender : user.gender;
 
             // Check if email is changed. If it is, set email verified to false
             if(req.body.email && req.body.email !== user.email) {
