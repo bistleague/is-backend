@@ -60,7 +60,7 @@ module.exports = function (fastify, opts, next) {
             let token = await emailVerifyRepository.generate(user.email);
 
             // Send email, publish to Pub/Sub topic
-            const resetUrl = `${process.env.FRONTEND_BASE_URL}/reset?email=${encodeURIComponent(email)}&token=${encodeURIComponent(token.token)}`;
+            const resetUrl = `${process.env.FRONTEND_BASE_URL}/reset?email=${encodeURIComponent(email)}&token=${encodeURIComponent(token.token)}&expires=${encodeURIComponent(token.expires)}`;
 
             let msg = {
                 to_address: user.email,
