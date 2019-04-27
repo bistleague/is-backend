@@ -74,16 +74,55 @@ module.exports = function (fastify, opts, next) {
                 user.email_verified = false;
             }
 
-            // Check if password is changed. If it is, generate hash and update
-            if(req.body.password) {
-                user.password_hash = bcrypt.hashSync(req.body.password, usersRepository.HASH_SALT);
-            }
-
             // Update to database
             await usersRepository.update(userId, user);
 
             return {success: true, user: user};
 
+        } catch (e) {
+            reply.code(500);
+            console.log(e);
+            return {error: e.toString()}
+        }
+    });
+
+    /**
+     * Edit user password
+     */
+    fastify.post('/password', async (req, reply) => {
+        try {
+            // Read login parameters
+            const userId = req.user.sub;
+
+            // Get user by userId
+            let user = await usersRepository.get(userId);
+
+            // Check if user exists
+            if(!user) {
+                reply.code(401);
+                return {error: "Invalid user"};
+            }
+
+            const oldpass = req.body.old_password;
+            const newpass = req.body.new_password;
+
+            // User exists, check password
+            const hash = user.password_hash;
+            const passwordMatch = await bcrypt.compare(oldpass, hash);
+
+            if(!passwordMatch) {
+                // Incorrect password
+                reply.code(401);
+                return {error: "Invalid current password"};
+            }
+
+            // All is well, change password
+            user.password_hash = bcrypt.hashSync(newpass, usersRepository.HASH_SALT);
+
+            // Update to database
+            await usersRepository.update(userId, user);
+
+            return {success: true};
         } catch (e) {
             reply.code(500);
             console.log(e);
