@@ -1,7 +1,7 @@
 # BIST League 2.0 IS Backend
 BIST League 2019 information system backend
 
-####Environment variables
+###Environment variables
 ```
 PORT=<port>
 JWT_SECRET=<insert JWT secret>
@@ -10,4 +10,5 @@ GCP_PROJECT_ID=<insert GCP project ID>
 GCP_DATASTORE_CREDENTIALS_JSON_PATH=<insert service account JSON path (optional)>
 ADMIN_USERNAME=<insert preconfigured admin username (optional)>
 ADMIN_PASSWORD=<insert preconfigured admin password (optional)>
+SENDMAIL_TOPIC_NAME=<sendmail topic name>
 ```
