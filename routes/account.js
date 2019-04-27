@@ -16,7 +16,6 @@ module.exports = function (fastify, opts, next) {
      */
     fastify.post('/create', async (req, reply) => {
         try {
-            // TODO implement
             const name = req.body.name;
             const email = req.body.email;
             const password = req.body.password;
@@ -90,7 +89,6 @@ module.exports = function (fastify, opts, next) {
      */
     fastify.post('/reset', async (req, reply) => {
         try {
-            // TODO implement
             const email = req.body.email;
             const token = req.body.token;
             const password = req.body.password;
