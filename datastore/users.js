@@ -73,8 +73,6 @@ exports.add = async function(user) {
         data: user
     };
 
-    console.log(user);
-
     // Insert
     await db.insert(entity);
 };

@@ -1,12 +1,12 @@
 /**
- * Email verification token model abstraction
+ * Password reset token model abstraction
  */
 
 const db = require('./datastore');
 
-const ENTITY_NAME = 'EmailVerifyToken';
+const ENTITY_NAME = 'PasswordResetToken';
 const EmailToken = require('../model/EmailToken');
-const tokenExpiresSecs = 3600 * 24;
+const tokenExpiresSecs = 3600;
 
 /**
  * Get token by email
