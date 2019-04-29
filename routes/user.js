@@ -150,6 +150,12 @@ module.exports = function (fastify, opts, next) {
                 return {error: "Invalid user"};
             }
 
+            // Check if email is already verified
+            if(user.email_verified === true) {
+                reply.code(400);
+                return {error: "Email address already verified"};
+            }
+
             // Send email
             await sendEmailVerificationMail(user);
 
