@@ -4,7 +4,7 @@
  *
  * @author Muhammad Aditya Hilmy
  */
-module.exports.TeamStage = {
+export const TeamStage = {
     STAGE_REGISTERED: 0,
     STAGE_COMPLETED: 1,
     STAGE_SUBMITTED_PRELIMINARY: 2,
@@ -20,4 +20,5 @@ export function Team() {
     this.stage = TeamStage.STAGE_REGISTERED;
     this.proof_of_payment_file_id = undefined;
     this.proof_of_payment_verified = false;
+    this.invite_code = undefined;
 }

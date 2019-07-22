@@ -5,7 +5,6 @@
 import { Team, TeamStage } from "../model/Team";
 
 const db = require('./datastore');
-const bcrypt = require('bcrypt');
 const uuidv4 = require('uuid/v4');
 
 const ENTITY_NAME = 'Team';

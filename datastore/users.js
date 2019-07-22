@@ -32,6 +32,21 @@ exports.getByEmail = async function(email) {
 };
 
 /**
+ * Get user by Team ID
+ */
+exports.getByTeamId = async function(teamId) {
+    if(!teamId) {
+        return [];
+    }
+
+    const query = db.createQuery(ENTITY_NAME)
+        .filter('team_id', '=', teamId);
+
+    const [users] = await db.runQuery(query);
+    return users;
+};
+
+/**
  * Get user by ID
  */
 exports.get = async function(id) {

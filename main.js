@@ -4,7 +4,7 @@
  */
 
 require("dotenv").config();
-
+require("./datastore/config");
 const fastify = require('fastify')({ logger: true });
 
 fastify.register(require('fastify-jwt'), {

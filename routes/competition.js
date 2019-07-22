@@ -3,7 +3,10 @@
  * Prefix: /v1/competition
  */
 const { Team, TeamStage } = require("../model/Team");
+const { Config, ConfigKeys } = require("../model/Config");
+const { CompetitionStage } = require("../model/CompetitionStage");
 const { saveTeam, updateTeam, getTeamById } = require("../datastore/team");
+const { getConfig } = require("../datastore/config");
 
 const db = require('../datastore/datastore');
 const usersRepository = require('../datastore/users');
@@ -14,6 +17,29 @@ module.exports = function (fastify, opts, next) {
      */
     fastify.addHook('preHandler', function (req, reply) {
         return req.jwtVerify()
+    });
+
+    fastify.get('/', async (req, reply) => {
+        // Read login parameters
+        const userId = req.user.sub;
+
+        // Get user by userId
+        let user = await usersRepository.get(userId);
+
+        // Check if user exists
+        if(!user) {
+            reply.code(401);
+            return {error: "Invalid user"};
+        }
+
+        const stageConfig = await getConfig(ConfigKeys.COMPETITION_STAGE);
+
+        switch(stageConfig) {
+            case (CompetitionStage.REGISTRATION_OPENED):
+                return await stage_registrationOpened(user.team_id);
+            default:
+                return {};
+        }
     });
 
     /**
@@ -96,6 +122,48 @@ module.exports = function (fastify, opts, next) {
             return {error: e.toString()}
         }
     });
+
+    async function stage_registrationOpened(teamId) {
+        const team = await getTeamById(teamId);
+
+        if(!team)
+            return {step: 0};
+
+        let memberUsers = await usersRepository.getByTeamId(teamId);
+        let teamMembers = memberUsers.map((user) => {
+            return {
+                name: user.name,
+                id: user.id,
+                email: user.email,
+                student_id: {
+                    uploaded: !(!user.student_id_file_id),
+                    status: "PENDING", // TODO get status,
+                    filename: "",    // TODO get filename
+                    url: "" // TODO get url
+                },
+                proof_of_enrollment: {
+                    uploaded: !(!user.poe_file_id),
+                    status: "VERIFIED", // TODO get status,
+                    filename: "",    // TODO get filename
+                    url: "" // TODO get url
+                }
+            }
+        });
+
+        return {
+            step: 1,
+            data: {
+                team_name: team.name,
+                university: team.university,
+                invite_code: team.invite_code,
+                payment: {
+                    uploaded: !(!team.proof_of_payment_file_id),
+                    status: "PENDING"   // TODO status
+                },
+                team_members: teamMembers
+            }
+        }
+    }
 
     next();
 };
