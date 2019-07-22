@@ -3,7 +3,7 @@
  * Prefix: /v1/competition
  */
 const { Team, TeamStage } = require("../model/Team");
-const { saveTeam } = require("../datastore/team");
+const { saveTeam, updateTeam, getTeamById } = require("../datastore/team");
 
 const db = require('../datastore/datastore');
 const usersRepository = require('../datastore/users');
@@ -19,7 +19,7 @@ module.exports = function (fastify, opts, next) {
     /**
      * Create team
      */
-    fastify.post('/create', async (req, reply) => {
+    fastify.post('/team', async (req, reply) => {
         try {
             // Read login parameters
             const userId = req.user.sub;
@@ -35,7 +35,6 @@ module.exports = function (fastify, opts, next) {
 
             // Check if user is in a team
             if(user.team_id) {
-                console.log("teamId", user.team_id);
                 reply.code(400);
                 return {error: "User already has a team"};
             }
@@ -53,9 +52,44 @@ module.exports = function (fastify, opts, next) {
             user.team_id = savedTeam.team_id;
             await usersRepository.update(userId, user);
 
-            console.log("User", user);
-
             return savedTeam;
+        } catch (e) {
+            reply.code(500);
+            console.log(e);
+            return {error: e.toString()}
+        }
+    });
+
+    /**
+     * Update team
+     */
+    fastify.put('/team', async (req, reply) => {
+        try {
+            // Read login parameters
+            const userId = req.user.sub;
+
+            // Get user by userId
+            let user = await usersRepository.get(userId);
+
+            // Check if user exists
+            if(!user) {
+                reply.code(401);
+                return {error: "Invalid user"};
+            }
+
+            // Check if user is in a team
+            const teamId = user.team_id;
+            if(!teamId) {
+                reply.code(400);
+                return {error: "User is not in a team"};
+            }
+
+            await updateTeam(teamId, {
+                name: req.body.name,
+                university: req.body.university
+            });
+
+            return {success: true};
         } catch (e) {
             reply.code(500);
             console.log(e);
