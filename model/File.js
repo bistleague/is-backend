@@ -5,13 +5,12 @@
  * @author Alfian Maulana Ibrahim
  */
 
-function File(url, options) {
-    if (options === undefined) options = {};
-
+function File(fileId, filename, url, key) {
     // Primary file attributes
     this.filename = filename;
     this.url = url;
     this.key = key;
+    this.id = fileId;
 }
 
 module.exports = File;
