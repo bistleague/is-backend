@@ -24,10 +24,6 @@ export async function saveTeam(team) {
         return;
     }
 
-    if(!team.name || !team.university) {
-        return;
-    }
-
     // All is well
     const teamId = uuidv4();
     team.team_id = teamId;

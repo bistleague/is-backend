@@ -68,10 +68,8 @@ module.exports = function (fastify, opts, next) {
 
             // All is well
             const team = {
-                name: req.body.name,
-                university: req.body.university,
                 stage: TeamStage.STAGE_REGISTERED,
-                invite_code: findUniqueInviteCode()
+                invite_code: await findUniqueInviteCode()
             };
 
             const savedTeam = await saveTeam(team);
@@ -167,12 +165,12 @@ module.exports = function (fastify, opts, next) {
         }
     }
 
-    function findUniqueInviteCode() {
+    async function findUniqueInviteCode() {
         const INVITE_CODE_LENGTH = 6;
 
         let inviteCode = generateInviteCode(INVITE_CODE_LENGTH);
 
-        while(inviteCodeExists(inviteCode)) {
+        while(await inviteCodeExists(inviteCode)) {
             inviteCode = generateInviteCode(INVITE_CODE_LENGTH);
         }
 
@@ -180,9 +178,9 @@ module.exports = function (fastify, opts, next) {
 
     }
 
-    function inviteCodeExists(inviteCode) {
-        const team = getTeamByInviteCode(inviteCode);
-        return !(!team);
+    async function inviteCodeExists(inviteCode) {
+        const team = await getTeamByInviteCode(inviteCode);
+        return !!team;
     }
 
     next();
