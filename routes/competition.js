@@ -5,8 +5,9 @@
 const { Team, TeamStage } = require("../model/Team");
 const { Config, ConfigKeys } = require("../model/Config");
 const { CompetitionStage } = require("../model/CompetitionStage");
-const { saveTeam, updateTeam, getTeamById } = require("../datastore/team");
+const { saveTeam, updateTeam, getTeamById, getTeamByInviteCode } = require("../datastore/team");
 const { getConfig } = require("../datastore/config");
+const { generateInviteCode } = require("../helper");
 
 const db = require('../datastore/datastore');
 const usersRepository = require('../datastore/users');
@@ -69,7 +70,8 @@ module.exports = function (fastify, opts, next) {
             const team = {
                 name: req.body.name,
                 university: req.body.university,
-                stage: TeamStage.STAGE_REGISTERED
+                stage: TeamStage.STAGE_REGISTERED,
+                invite_code: findUniqueInviteCode()
             };
 
             const savedTeam = await saveTeam(team);
@@ -163,6 +165,24 @@ module.exports = function (fastify, opts, next) {
                 team_members: teamMembers
             }
         }
+    }
+
+    function findUniqueInviteCode() {
+        const INVITE_CODE_LENGTH = 6;
+
+        let inviteCode = generateInviteCode(INVITE_CODE_LENGTH);
+
+        while(inviteCodeExists(inviteCode)) {
+            inviteCode = generateInviteCode(INVITE_CODE_LENGTH);
+        }
+
+        return inviteCode;
+
+    }
+
+    function inviteCodeExists(inviteCode) {
+        const team = getTeamByInviteCode(inviteCode);
+        return !(!team);
     }
 
     next();

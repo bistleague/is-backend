@@ -81,6 +81,18 @@ export async function deleteTeam(id) {
     await db.delete(key);
 }
 
+export async function getTeamByInviteCode(inviteCode) {
+    if(!inviteCode) {
+        return null;
+    }
+
+    const query = db.createQuery(ENTITY_NAME)
+        .filter('invite_code', '=', inviteCode);
+
+    const [teams] = await db.runQuery(query);
+    return teams[0];
+}
+
 function isStageValid(stage) {
     return stage === TeamStage.STAGE_REGISTERED ||
         stage === TeamStage.STAGE_COMPLETED ||
