@@ -56,8 +56,8 @@ export async function updateTeam(teamId, team) {
     if(team.name) dbTeam.name = team.name;
     if(team.university) dbTeam.university = team.university;
     if(team.stage) dbTeam.stage = team.stage;
-    if(team.proof_of_payment_file_id) dbTeam.proof_of_payment_file_id = team.proof_of_payment_file_id;
-    if(team.proof_of_payment_verified) dbTeam.proof_of_payment_verified = team.proof_of_payment_verified === true;
+    if(team.proof_of_payment_file_id !== undefined) dbTeam.proof_of_payment_file_id = team.proof_of_payment_file_id;
+    if(team.proof_of_payment_verified !== undefined) dbTeam.proof_of_payment_verified = team.proof_of_payment_verified === true;
 
     const key = db.key([ENTITY_NAME, teamId]);
 

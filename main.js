@@ -16,7 +16,7 @@ fastify.register(require('fastify-jwt'), {
 
 fastify.register(require('fastify-cors'), {
     origin: true,
-    methods: ['GET', 'PUT', 'POST'],
+    methods: ['GET', 'PUT', 'POST', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization']
 });
 

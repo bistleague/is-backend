@@ -2,6 +2,7 @@
  * Competition endpoints
  * Prefix: /v1/competition
  */
+
 const { Team, TeamStage } = require("../model/Team");
 const { Config, ConfigKeys } = require("../model/Config");
 const { CompetitionStage } = require("../model/CompetitionStage");
@@ -13,7 +14,7 @@ const db = require('../datastore/datastore');
 const usersRepository = require('../datastore/users');
 const filesRepository = require('../datastore/files');
 const File = require('../model/File');
-const {upload} = require('../datastore/file_storage');
+const {upload, deleteFile} = require('../datastore/file_storage');
 
 module.exports = function (fastify, opts, next) {
     /**
@@ -131,7 +132,7 @@ module.exports = function (fastify, opts, next) {
      */
     fastify.route({
         method: 'POST',
-        url: '/team/upload_pop',
+        url: '/team/pop',
         preHandler: upload.single('file'),
         handler: async function(req, reply) {
             // Read login parameters
@@ -156,7 +157,8 @@ module.exports = function (fastify, opts, next) {
             const file = req.file;
 
             // Add to Database
-            const dbFile = await filesRepository.add(new File('', file.filename, file.path));
+            const url = `${process.env.GCP_STORAGE_BASE_URL}/${file.filename}`;
+            const dbFile = await filesRepository.add(new File('', file.filename, url));
 
             await updateTeam(teamId, {
                 proof_of_payment_file_id: dbFile.id,
@@ -166,6 +168,55 @@ module.exports = function (fastify, opts, next) {
             // request.file is the `avatar` file
             // request.body will hold the text fields, if there were any
             reply.code(200).send();
+        }
+    });
+
+    /**
+     * Delete proof of payment
+     */
+    fastify.route({
+        method: 'DELETE',
+        url: '/team/pop',
+        handler: async function(req, reply) {
+            // Read login parameters
+            const userId = req.user.sub;
+
+            // Get user by userId
+            let user = await usersRepository.get(userId);
+
+            // Check if user exists
+            if(!user) {
+                reply.code(401);
+                return {error: "Invalid user"};
+            }
+
+            // Check if user is in a team
+            const teamId = user.team_id;
+            if(!teamId) {
+                reply.code(400);
+                return {error: "User is not in a team"};
+            }
+
+            const team = await getTeamById(teamId);
+            const fileId = team.proof_of_payment_file_id;
+            if(!fileId) {
+                reply.code(400);
+                return {error: "Proof of payment is not yet uploaded"};
+            }
+
+            const file = await filesRepository.get(fileId);
+            deleteFile(file.filename);
+
+            await filesRepository.delete(fileId);
+
+            await updateTeam(teamId, {
+                proof_of_payment_file_id: null,
+                proof_of_payment_verified: false
+            });
+
+            // request.file is the `avatar` file
+            // request.body will hold the text fields, if there were any
+            reply.code(200).send({success: true, fileId: team.proof_of_payment_file_id});
         }
     });
 
@@ -196,6 +247,12 @@ module.exports = function (fastify, opts, next) {
             }
         });
 
+        let proofOfPaymentFile;
+
+        if(team.proof_of_payment_file_id) {
+            proofOfPaymentFile = await filesRepository.get(team.proof_of_payment_file_id);
+        }
+
         return {
             step: 1,
             data: {
@@ -204,6 +261,8 @@ module.exports = function (fastify, opts, next) {
                 invite_code: team.invite_code,
                 payment: {
                     uploaded: !(!team.proof_of_payment_file_id),
+                    url: (proofOfPaymentFile) ? proofOfPaymentFile.url : undefined,
+                    filename: (proofOfPaymentFile) ? proofOfPaymentFile.filename.split('/').pop() : undefined,
                     status: "PENDING"   // TODO status
                 },
                 team_members: teamMembers
