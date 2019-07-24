@@ -8,10 +8,15 @@ const filesRepository = require('../datastore/files');
 const File = require('../model/File');
 const fileHandlers = require('../datastore/file_handlers');
 
-const BLStorageEngine = require('../cloudstorage/file_storage_engine');
 const multer = require('fastify-multer');
+const multerGoogleStorage = require('multer-google-storage');
+const storageEngine = multerGoogleStorage.storageEngine({
+    projectId: process.env.GCP_PROJECT_ID,
+    keyFilename: process.env.GCP_DATASTORE_CREDENTIALS_JSON_PATH,
+    bucket: process.env.GCP_STORAGE_BUCKET_NAME
+});
 const upload = multer({
-    storage: new BLStorageEngine()
+    storage: storageEngine
 });
 
 module.exports = function (fastify, opts, next) {
@@ -88,42 +93,9 @@ module.exports = function (fastify, opts, next) {
      * Upload data
      * URL param: module: determine which module to call
      */
-    fastify.post('/upload', async function (req, reply) {
-
-        const handlerName = req.query.handler;
-        const fileHandler = fileHandlers.getHandler(handlerName);
-
-        if(!fileHandler) {
-            reply.code(404);
-            return {success: false};
-        }
-
-        const mp = req.multipart(handler, function (err) {
-            console.log('Upload completed', err);
-            reply.code(200).send();
-        });
-
-        // mp.on('field', function (key, value) {
-        //     console.log('form-data', key, value);
-        // });
-
-        async function handler(field, file, filename, encoding, mimetype) {
-            // TODO upload to Cloud Filestore
-            const fileUrl = ''; // TODO from GCP
-            const fileKey = ''; // TODO from GCP
-
-            // Add to Database
-            const dbFile = await filesRepository.add(new File('', filename, fileUrl, fileKey));
-            await fileHandler(req, reply, filename, dbFile.id);
-
-            console.log(file);
-            reply.code(200).send();
-        }
-    });
-
     fastify.route({
         method: 'POST',
-        url: '/upload2',
+        url: '/upload',
         preHandler: (req, reply, next) => {
             const handlerName = req.query.handler;
             if(!fileHandlerExists(handlerName)) {

@@ -37,8 +37,6 @@ exports.add = async function(file) {
         data: file
     };
 
-    console.log(file);
-
     // Insert
     await db.insert(entity);
     return file;
