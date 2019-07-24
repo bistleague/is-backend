@@ -12,6 +12,7 @@ const { generateInviteCode } = require("../helper");
 const db = require('../datastore/datastore');
 const usersRepository = require('../datastore/users');
 const filesRepository = require('../datastore/files');
+const File = require('../model/File');
 const {upload} = require('../datastore/file_storage');
 
 module.exports = function (fastify, opts, next) {
@@ -130,7 +131,7 @@ module.exports = function (fastify, opts, next) {
      */
     fastify.route({
         method: 'POST',
-        url: '/upload_pop',
+        url: '/team/upload_pop',
         preHandler: upload.single('file'),
         handler: async function(req, reply) {
             // Read login parameters

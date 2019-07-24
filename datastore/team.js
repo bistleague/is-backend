@@ -43,7 +43,7 @@ export async function updateTeam(teamId, team) {
         throw "Team is empty";
     }
 
-    let dbTeam = getTeamById(teamId);
+    let dbTeam = await getTeamById(teamId);
 
     if(!dbTeam) {
         throw "Team not found";
