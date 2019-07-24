@@ -4,6 +4,7 @@
  *
  * @author Muhammad Aditya Hilmy
  */
+const { DocumentStatus } = require("./DocumentStatus");
 
 function User(name, email, passwordHash, options) {
     if (options === undefined) options = {};
@@ -24,9 +25,9 @@ function User(name, email, passwordHash, options) {
     // Competition-related attributes
     this.team_id = options.team_id || null;
     this.student_id_file_id = options.student_id_file_id || null;
-    this.student_id_verified = options.student_id_verified || null;
+    this.student_id_status = options.student_id_status || DocumentStatus.NOT_UPLOADED;
     this.poe_file_id = options.poe_file_id || null;
-    this.poe_verified = options.poe_verified || null;
+    this.poe_status = options.poe_status || null;
 }
 
 User.MALE = 1;
