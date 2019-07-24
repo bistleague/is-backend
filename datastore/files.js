@@ -2,6 +2,7 @@
  * Files model abstraction
  */
 
+const uuidv4 = require('uuid/v4');
 const File = require('../model/File');
 const db = require('./datastore');
 const ENTITY_NAME = 'File';
@@ -28,7 +29,7 @@ exports.add = async function(file) {
         return;
     }
 
-    const fileId = uuidv5(file.filename, uuidv5.DNS);
+    const fileId = uuidv4();
     file.id = fileId;
 
     const entity = {

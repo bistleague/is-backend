@@ -5,11 +5,10 @@
  * @author Alfian Maulana Ibrahim
  */
 
-function File(fileId, filename, url, key) {
+function File(fileId, filename, url) {
     // Primary file attributes
     this.filename = filename;
     this.url = url;
-    this.key = key;
     this.id = fileId;
 }
 
