@@ -11,6 +11,8 @@ const { generateInviteCode } = require("../helper");
 
 const db = require('../datastore/datastore');
 const usersRepository = require('../datastore/users');
+const filesRepository = require('../datastore/files');
+const {upload} = require('../datastore/file_storage');
 
 module.exports = function (fastify, opts, next) {
     /**
@@ -120,6 +122,49 @@ module.exports = function (fastify, opts, next) {
             reply.code(500);
             console.log(e);
             return {error: e.toString()}
+        }
+    });
+
+    /**
+     * Upload proof of payment
+     */
+    fastify.route({
+        method: 'POST',
+        url: '/upload_pop',
+        preHandler: upload.single('file'),
+        handler: async function(req, reply) {
+            // Read login parameters
+            const userId = req.user.sub;
+
+            // Get user by userId
+            let user = await usersRepository.get(userId);
+
+            // Check if user exists
+            if(!user) {
+                reply.code(401);
+                return {error: "Invalid user"};
+            }
+
+            // Check if user is in a team
+            const teamId = user.team_id;
+            if(!teamId) {
+                reply.code(400);
+                return {error: "User is not in a team"};
+            }
+
+            const file = req.file;
+
+            // Add to Database
+            const dbFile = await filesRepository.add(new File('', file.filename, file.path));
+
+            await updateTeam(teamId, {
+                proof_of_payment_file_id: dbFile.id,
+                proof_of_payment_verified: false
+            });
+
+            // request.file is the `avatar` file
+            // request.body will hold the text fields, if there were any
+            reply.code(200).send();
         }
     });
 

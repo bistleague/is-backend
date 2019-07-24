@@ -7,17 +7,7 @@ const db = require('../datastore/datastore');
 const filesRepository = require('../datastore/files');
 const File = require('../model/File');
 const fileHandlers = require('../datastore/file_handlers');
-
-const multer = require('fastify-multer');
-const multerGoogleStorage = require('multer-google-storage');
-const storageEngine = multerGoogleStorage.storageEngine({
-    projectId: process.env.GCP_PROJECT_ID,
-    keyFilename: process.env.GCP_DATASTORE_CREDENTIALS_JSON_PATH,
-    bucket: process.env.GCP_STORAGE_BUCKET_NAME
-});
-const upload = multer({
-    storage: storageEngine
-});
+const {upload} = require('../datastore/file_storage');
 
 module.exports = function (fastify, opts, next) {
     /**
