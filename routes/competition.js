@@ -165,15 +165,15 @@ module.exports = function (fastify, opts, next) {
                 return {error: "User is not in the same team"};
             }
 
+            user.team_id = null;
+            await usersRepository.update(userId, user);
+
             // Check if team has no more user
             const users = await usersRepository.getByTeamId(teamId);
 
             if(users.length === 0) {
                 await deleteTeam(teamId);
             }
-
-            user.team_id = null;
-            await usersRepository.update(userId, user);
 
             return {success: true};
         } catch (e) {
