@@ -6,7 +6,7 @@ const { DocumentStatus } = require("../model/DocumentStatus");
 const { Team, TeamStage } = require("../model/Team");
 const { Config, ConfigKeys } = require("../model/Config");
 const { CompetitionStage } = require("../model/CompetitionStage");
-const { saveTeam, updateTeam, getTeamById, getTeamByInviteCode } = require("../datastore/team");
+const { saveTeam, updateTeam, getTeamById, getTeamByInviteCode, deleteTeam } = require("../datastore/team");
 const { getConfig } = require("../datastore/config");
 const { generateInviteCode } = require("../helper");
 
@@ -172,7 +172,7 @@ module.exports = function (fastify, opts, next) {
             const users = await usersRepository.getByTeamId(teamId);
 
             if(users.length === 0) {
-                await deleteTeam(teamId);
+                await deleteTeamAndItsResources(teamId);
             }
 
             return {success: true};
@@ -536,7 +536,7 @@ module.exports = function (fastify, opts, next) {
         return !!team;
     }
 
-    async function deleteTeam(teamId) {
+    async function deleteTeamAndItsResources(teamId) {
         const team = await getTeamById(teamId);
 
         if(!team) {
