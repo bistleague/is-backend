@@ -268,6 +268,101 @@ module.exports = function (fastify, opts, next) {
         }
     });
 
+    fastify.route({
+        method: 'POST',
+        url: '/team/poe',
+        preHandler: upload.single('file'),
+        handler: async function(req, reply) {
+            const userId = req.user.sub;
+            const user = await usersRepository.get(userId);
+            if(!user) {
+                reply.code(401);
+                return {error: "Invalid user"};
+            }
+
+            // Check if user is in a team
+            const teamId = user.team_id;
+            if(!teamId) {
+                reply.code(400);
+                return {error: "User is not in a team"};
+            }
+
+            const targetUserId = req.query.user;
+            const targetUser = await usersRepository.get(targetUserId);
+            if(!targetUser) {
+                reply.code(401);
+                return {error: "Invalid user"};
+            }
+
+            if(user.team_id !== targetUser.team_id) {
+                reply.code(401);
+                return {error: "User is not in the same team"};
+            }
+
+            const file = req.file;
+
+            // Add to Database
+            const url = `${process.env.GCP_STORAGE_BASE_URL}/${file.filename}`;
+            const dbFile = await filesRepository.add(new File('', file.filename, url));
+
+            targetUser.poe_file_id = dbFile.id;
+            targetUser.poe_status = DocumentStatus.PENDING;
+            await usersRepository.update(targetUser.id, targetUser);
+
+            reply.code(200).send();
+        }
+    });
+
+    fastify.route({
+        method: 'DELETE',
+        url: '/team/poe',
+        handler: async function(req, reply) {
+            const userId = req.user.sub;
+            const user = await usersRepository.get(userId);
+            if(!user) {
+                reply.code(401);
+                return {error: "Invalid user"};
+            }
+
+            // Check if user is in a team
+            const teamId = user.team_id;
+            if(!teamId) {
+                reply.code(400);
+                return {error: "User is not in a team"};
+            }
+
+            const targetUserId = req.query.user;
+            const targetUser = await usersRepository.get(targetUserId);
+            if(!targetUser) {
+                reply.code(401);
+                return {error: "Invalid user"};
+            }
+
+            if(user.team_id !== targetUser.team_id) {
+                reply.code(401);
+                return {error: "User is not in the same team"};
+            }
+
+            const fileId = targetUser.poe_file_id;
+            if(!fileId) {
+                reply.code(400);
+                return {error: "PoE is not yet uploaded"};
+            }
+
+            const file = await filesRepository.get(fileId);
+            deleteFile(file.filename);
+
+            await filesRepository.delete(fileId);
+
+            targetUser.poe_file_id = null;
+            targetUser.poe_status = DocumentStatus.NOT_UPLOADED;
+
+            await usersRepository.update(targetUserId, targetUser);
+
+            reply.code(200).send({success: true});
+        }
+    });
+
     async function stage_registrationOpened(teamId) {
         const team = await getTeamById(teamId);
 
