@@ -33,7 +33,7 @@ module.exports = function (fastify, opts, next) {
 
         switch(stageConfig) {
             case (CompetitionStage.REGISTRATION_OPENED):
-                return await stage_registrationOpened(user.team_id);
+                return await stage_registrationOpened(user.team_id, user.id);
             default:
                 return {};
         }
@@ -89,6 +89,91 @@ module.exports = function (fastify, opts, next) {
                 name: req.body.name,
                 university: req.body.university
             });
+
+            return {success: true};
+        } catch (e) {
+            reply.code(500);
+            console.log(e);
+            return {error: e.toString()}
+        }
+    });
+
+    fastify.post('/team/member', async (req, reply) => {
+        try {
+            const userId = req.user.sub;
+            let user = await usersRepository.get(userId);
+            if(!user) {
+                reply.code(401);
+                return {error: "Invalid user"};
+            }
+
+            if(user.team_id) {
+                reply.code(400);
+                return {error: "User already has a team"};
+            }
+
+            const team = await getTeamByInviteCode(req.body.invite_code);
+
+            if(!team) {
+                reply.code(404);
+                return {error: "Invite code invalid"};
+            }
+
+            user.team_id = team.team_id;
+            await usersRepository.update(userId, user);
+
+            return team;
+        } catch (e) {
+            reply.code(500);
+            console.log(e);
+            return {error: e.toString()}
+        }
+    });
+
+    fastify.delete('/team/member', async (req, reply) => {
+        try {
+            const userId = req.user.sub;
+
+            let user = await usersRepository.get(userId);
+            if(!user) {
+                reply.code(401);
+                return {error: "Invalid user"};
+            }
+
+            const teamId = user.team_id;
+
+            if(!teamId) {
+                reply.code(400);
+                return {error: "User is not in a team"};
+            }
+
+            const targetUserId = req.query.user;
+            let targetUser;
+            if(targetUserId) {
+                targetUser = await usersRepository.get(targetUserId);
+            } else {
+                targetUser = user;
+            }
+
+            if(!targetUser) {
+                reply.code(404);
+                return {error: "User not found"};
+            }
+
+            if(targetUser.team_id !== teamId) {
+                reply.code(401);
+                return {error: "User is not in the same team"};
+            }
+
+            // Check if team has no more user
+            const users = await usersRepository.getByTeamId(teamId);
+
+            if(users.length === 0) {
+                await deleteTeam(teamId);
+            }
+
+            user.team_id = null;
+            await usersRepository.update(userId, user);
 
             return {success: true};
         } catch (e) {
@@ -363,7 +448,7 @@ module.exports = function (fastify, opts, next) {
         }
     });
 
-    async function stage_registrationOpened(teamId) {
+    async function stage_registrationOpened(teamId, userId) {
         const team = await getTeamById(teamId);
 
         if(!team)
@@ -393,6 +478,7 @@ module.exports = function (fastify, opts, next) {
                 name: user.name,
                 id: user.id,
                 email: user.email,
+                is_user: user.id === userId,
                 student_id: {
                     uploaded: !(!user.student_id_file_id),
                     status: studentIdStatus,
@@ -448,6 +534,25 @@ module.exports = function (fastify, opts, next) {
     async function inviteCodeExists(inviteCode) {
         const team = await getTeamByInviteCode(inviteCode);
         return !!team;
+    }
+
+    async function deleteTeam(teamId) {
+        const team = await getTeamById(teamId);
+
+        if(!team) {
+            throw "Team not exists";
+        }
+
+        const popFileId = team.proof_of_payment_file_id;
+
+        if(popFileId) {
+            const popFile = await filesRepository.get(popFileId);
+
+            await deleteFile(popFile.filename);
+            await filesRepository.delete(popFileId);
+        }
+
+        await deleteTeam(teamId);
     }
 
     next();
