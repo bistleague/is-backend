@@ -10,6 +10,7 @@ const emailVerifyRepository = require('../datastore/email_verification');
 const pubsub = require('../pubsub');
 const User = require('../model/User');
 const db = require('../datastore/datastore');
+const validator = require('validator');
 
 module.exports = function (fastify, opts, next) {
     /**
@@ -18,7 +19,7 @@ module.exports = function (fastify, opts, next) {
     fastify.post('/create', async (req, reply) => {
         try {
             const name = req.body.name;
-            const email = req.body.email;
+            const email = validator.normalizeEmail(req.body.email);
             const password = req.body.password;
 
             // Create User entity
@@ -77,7 +78,7 @@ module.exports = function (fastify, opts, next) {
      */
     fastify.post('/recover', async (req, reply) => {
         try {
-            const email = req.body.email;
+            const email = validator.normalizeEmail(req.body.email);
 
             // See if email is registered
             const user = await usersRepository.getByEmail(email);
@@ -120,7 +121,7 @@ module.exports = function (fastify, opts, next) {
      */
     fastify.post('/reset', async (req, reply) => {
         try {
-            const email = req.body.email;
+            const email = validator.normalizeEmail(req.body.email);
             const token = req.body.token;
             const password = req.body.password;
 
@@ -169,7 +170,7 @@ module.exports = function (fastify, opts, next) {
      */
     fastify.post('/verify_email', async (req, reply) => {
         try {
-            const email = req.body.email;
+            const email = validator.normalizeEmail(req.body.email);
             const token = req.body.token;
 
             // Retrieve token

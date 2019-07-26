@@ -5,6 +5,7 @@
 
 const bcrypt = require('bcrypt');
 const usersRepository = require('../datastore/users');
+const validator = require('validator');
 
 module.exports = function (fastify, opts, next) {
     /**
@@ -13,7 +14,7 @@ module.exports = function (fastify, opts, next) {
     fastify.post('/login', async (req, reply) => {
         try {
             // Read login parameters
-            const email = req.body.email;
+            const email = validator.normalizeEmail(req.body.email);
             const password = req.body.password;
 
             // Get user with the same email
