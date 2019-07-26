@@ -7,6 +7,7 @@ require("dotenv").config();
 require("./datastore/config");
 
 const fastify = require('fastify')({ logger: true });
+fastify.register(require('fastify-multipart'));
 
 fastify.register(require('fastify-jwt'), {
     secret: process.env.JWT_SECRET
