@@ -33,7 +33,7 @@ module.exports = function (fastify, opts, next) {
 
         switch(stageConfig) {
             case (CompetitionStage.REGISTRATION_OPENED):
-                return await stage_registrationOpened(user.team_id, user.id);
+                return await stage_registrationOpened(user);
             default:
                 return {};
         }
@@ -448,7 +448,14 @@ module.exports = function (fastify, opts, next) {
         }
     });
 
-    async function stage_registrationOpened(teamId, userId) {
+    async function stage_registrationOpened(user) {
+        const teamId = user.team_id;
+        const userId = user.id;
+
+        if(!isProfileComplete(user)) {
+            return {step: -1, error: 'PROFILE_INCOMPLETE'};
+        }
+
         const team = await getTeamById(teamId);
 
         if(!team)
@@ -457,36 +464,36 @@ module.exports = function (fastify, opts, next) {
         let memberUsers = await usersRepository.getByTeamId(teamId);
         let teamMembers = [];
         for(let i = 0; i < memberUsers.length; i++) {
-            const user = memberUsers[i];
+            const memberUser = memberUsers[i];
 
             let studentIdFile;
             let studentIdStatus;
             let proofOfEnrollmentFile;
             let proofOfEnrollmentStatus;
 
-            if(user.student_id_file_id) {
-                studentIdFile = await filesRepository.get(user.student_id_file_id);
-                studentIdStatus = user.student_id_status || DocumentStatus.NOT_UPLOADED;
+            if(memberUser.student_id_file_id) {
+                studentIdFile = await filesRepository.get(memberUser.student_id_file_id);
+                studentIdStatus = memberUser.student_id_status || DocumentStatus.NOT_UPLOADED;
             }
 
-            if(user.poe_file_id) {
-                proofOfEnrollmentFile = await filesRepository.get(user.poe_file_id);
-                proofOfEnrollmentStatus = user.poe_status || DocumentStatus.NOT_UPLOADED;
+            if(memberUser.poe_file_id) {
+                proofOfEnrollmentFile = await filesRepository.get(memberUser.poe_file_id);
+                proofOfEnrollmentStatus = memberUser.poe_status || DocumentStatus.NOT_UPLOADED;
             }
 
             const member = {
-                name: user.name,
-                id: user.id,
-                email: user.email,
-                is_user: user.id === userId,
+                name: memberUser.name,
+                id: memberUser.id,
+                email: memberUser.email,
+                is_user: memberUser.id === userId,
                 student_id: {
-                    uploaded: !(!user.student_id_file_id),
+                    uploaded: !(!memberUser.student_id_file_id),
                     status: studentIdStatus,
                     url: (studentIdFile) ? studentIdFile.url : undefined,
                     filename: (studentIdFile) ? studentIdFile.filename.split('/').pop() : undefined,
                 },
                 proof_of_enrollment: {
-                    uploaded: !(!user.poe_file_id),
+                    uploaded: !(!memberUser.poe_file_id),
                     status: proofOfEnrollmentStatus,
                     url: (proofOfEnrollmentFile) ? proofOfEnrollmentFile.url : undefined,
                     filename: (proofOfEnrollmentFile) ? proofOfEnrollmentFile.filename.split('/').pop() : undefined,
@@ -553,6 +560,10 @@ module.exports = function (fastify, opts, next) {
         }
 
         await deleteTeam(teamId);
+    }
+
+    function isProfileComplete(user) {
+        return user.name && user.email && user.gender && user.mobile_no && user.university && user.major;
     }
 
     next();
