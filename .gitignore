@@ -1,3 +1,11 @@
 node_modules/
 .idea/
 .env
+bistleague-client-staging.json
+bistleague-client-prod.json
+bistleague-prod-deployment.json
+bistleague-beta-deployment.json
+package-lock.json
+app-staging.yaml
+app-prod.yaml
+secrets.tar
