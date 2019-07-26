@@ -1,6 +1,7 @@
 node_modules/
 .idea/
-.env
+.env.staging
+.env.prod
 bistleague-client-staging.json
 bistleague-client-prod.json
 bistleague-prod-deployment.json
