@@ -56,6 +56,7 @@ export async function updateTeam(teamId, team) {
     if(team.name) dbTeam.name = team.name;
     if(team.university) dbTeam.university = team.university;
     if(team.stage) dbTeam.stage = team.stage;
+    if(team.invite_code) dbTeam.invite_code = team.invite_code;
     if(team.proof_of_payment_file_id !== undefined) dbTeam.proof_of_payment_file_id = team.proof_of_payment_file_id;
     if(team.proof_of_payment_verified !== undefined) dbTeam.proof_of_payment_verified = team.proof_of_payment_verified === true;
 

@@ -40,7 +40,8 @@ module.exports = function (fastify, opts, next) {
     });
 
     fastify.post('/team', async (req, reply) => {
-        try {const userId = req.user.sub;
+        try {
+            const userId = req.user.sub;
             let user = await usersRepository.get(userId);
             if(!user) {
                 reply.code(401);
@@ -91,6 +92,35 @@ module.exports = function (fastify, opts, next) {
             });
 
             return {success: true};
+        } catch (e) {
+            reply.code(500);
+            console.log(e);
+            return {error: e.toString()}
+        }
+    });
+
+    fastify.post('/team/invite_code', async (req, reply) => {
+        try {
+            const userId = req.user.sub;
+            let user = await usersRepository.get(userId);
+            if(!user) {
+                reply.code(401);
+                return {error: "Invalid user"};
+            }
+
+            const teamId = user.team_id;
+            if(!teamId) {
+                reply.code(400);
+                return {error: "User is not in a team"};
+            }
+
+            const inviteCode = await findUniqueInviteCode();
+
+            await updateTeam(teamId, {
+                invite_code: inviteCode
+            });
+
+            return {success: true, code: inviteCode};
         } catch (e) {
             reply.code(500);
             console.log(e);
@@ -165,8 +195,8 @@ module.exports = function (fastify, opts, next) {
                 return {error: "User is not in the same team"};
             }
 
-            user.team_id = null;
-            await usersRepository.update(userId, user);
+            targetUser.team_id = null;
+            await usersRepository.update(targetUser.id, targetUser);
 
             // Check if team has no more user
             const users = await usersRepository.getByTeamId(teamId);
