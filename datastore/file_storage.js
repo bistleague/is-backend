@@ -10,7 +10,10 @@ const storageEngine = multerGoogleStorage.storageEngine({
     }
 });
 export const upload = multer({
-    storage: storageEngine
+    storage: storageEngine,
+    limits: {
+        fileSize: 50 * 1024 * 1024 // 50 MB
+    }
 });
 
 export function deleteFile(filename) {
