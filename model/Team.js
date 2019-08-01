@@ -21,4 +21,5 @@ export function Team() {
     this.proof_of_payment_file_id = undefined;
     this.proof_of_payment_verified = false;
     this.invite_code = undefined;
+    this.created_time = Date.now();
 }

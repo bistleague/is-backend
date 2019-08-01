@@ -55,7 +55,8 @@ module.exports = function (fastify, opts, next) {
 
             const team = {
                 stage: TeamStage.STAGE_REGISTERED,
-                invite_code: await findUniqueInviteCode()
+                invite_code: await findUniqueInviteCode(),
+                created_time: Date.now()
             };
 
             const savedTeam = await saveTeam(team);
