@@ -237,7 +237,7 @@ module.exports = function (fastify, opts, next) {
 
             // Add to Database
             const url = `${process.env.GCP_STORAGE_BASE_URL}/${file.filename}`;
-            const dbFile = await filesRepository.add(new File('', file.filename, url));
+            const dbFile = await filesRepository.add(new File('', file.filename, url, Date.now()));
 
             await updateTeam(teamId, {
                 proof_of_payment_file_id: dbFile.id,
@@ -324,7 +324,7 @@ module.exports = function (fastify, opts, next) {
 
             // Add to Database
             const url = `${process.env.GCP_STORAGE_BASE_URL}/${file.filename}`;
-            const dbFile = await filesRepository.add(new File('', file.filename, url));
+            const dbFile = await filesRepository.add(new File('', file.filename, url, Date.now()));
 
             targetUser.student_id_file_id = dbFile.id;
             targetUser.student_id_status = DocumentStatus.PENDING;
@@ -419,7 +419,7 @@ module.exports = function (fastify, opts, next) {
 
             // Add to Database
             const url = `${process.env.GCP_STORAGE_BASE_URL}/${file.filename}`;
-            const dbFile = await filesRepository.add(new File('', file.filename, url));
+            const dbFile = await filesRepository.add(new File('', file.filename, url, Date.now()));
 
             targetUser.poe_file_id = dbFile.id;
             targetUser.poe_status = DocumentStatus.PENDING;
