@@ -26,7 +26,7 @@ module.exports = function (fastify, opts, next) {
             // Create password hash
             const hash = bcrypt.hashSync(password, usersRepository.HASH_SALT);
 
-            let user = new User(name, email, hash);
+            let user = new User(name, email, hash, {created_time: Date.now()});
 
             try {
                 // Add to database
