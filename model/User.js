@@ -28,6 +28,8 @@ function User(name, email, passwordHash, options) {
     this.student_id_status = options.student_id_status || DocumentStatus.NOT_UPLOADED;
     this.poe_file_id = options.poe_file_id || null;
     this.poe_status = options.poe_status || null;
+
+    this.created_time = options.created_time || Date.now();
 }
 
 User.MALE = 1;
