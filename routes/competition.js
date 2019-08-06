@@ -34,6 +34,24 @@ module.exports = function (fastify, opts, next) {
         switch(stageConfig) {
             case (CompetitionStage.REGISTRATION_OPENED):
                 return await stage_registrationOpened(user);
+            case (CompetitionStage.REGISTRATION_CLOSED):
+                return await stage_registrationClosed(user);
+            case (CompetitionStage.PRELIMINARY_CASE_RELEASED):
+                return await stage_preliminaryCaseReleased(user);
+            case (CompetitionStage.PRELIMINARY_SUBMISSION_DEADLINE):
+                return await stage_preliminarySubmissionDeadline(user);
+            case (CompetitionStage.PRELIMINARY_STAGE_CLOSED):
+                return await stage_preliminaryStageClosed(user);
+            case (CompetitionStage.SEMIFINAL_RESULTS_ANNOUNCED):
+                return await stage_semifinalResultsAnnounced(user);
+            case (CompetitionStage.SEMIFINAL_CASE_RELEASED):
+                return await stage_semifinalCaseReleased(user);
+            case (CompetitionStage.SEMIFINAL_SUBMISSION_DEADLINE):
+                return await stage_semifinalSubmissionDeadline(user);
+            case (CompetitionStage.SEMIFINAL_STAGE_CLOSED):
+                return await stage_semifinalStageClosed(user);
+            case (CompetitionStage.FINAL_RESULTS_ANNOUNCED):
+                return await stage_finalResultsAnnounced(user);
             default:
                 return {};
         }
@@ -554,6 +572,240 @@ module.exports = function (fastify, opts, next) {
                 team_members: teamMembers
             }
         }
+    }
+
+    async function stage_registrationClosed(user) {
+        const team = await userHasEligibleTeam(user);
+        if(!team) return { step: -1 };
+
+        return {
+            step: 2,
+            data: {
+                started: false,
+                team_name: team.name
+            }
+        }
+    }
+
+    async function stage_preliminaryCaseReleased(user) {
+        const team = await userHasEligibleTeam(user);
+        if(!team) return { step: -1 };
+
+        return {
+            step: 2,
+            data: {
+                started: true,
+                stage_closed: false,
+                team_name: team.name,
+                case_url: "http://files.bistleague.com/public/preliminary.pdf",
+                submission: {
+                    ...await getPreliminarySubmissionData(),
+                    closed: false,
+                }
+            }
+        }
+    }
+
+    async function stage_preliminarySubmissionDeadline(user) {
+        const team = await userHasEligibleTeam(user);
+        if(!team) return { step: -1 };
+
+        return {
+            step: 2,
+            data: {
+                started: true,
+                stage_closed: false,
+                team_name: team.name,
+                case_url: "http://files.bistleague.com/public/preliminary.pdf",
+                submission: {
+                    ...await getPreliminarySubmissionData(team),
+                    closed: true,
+                }
+            }
+        }
+    }
+
+    async function stage_preliminaryStageClosed(user) {
+        const team = await userHasEligibleTeam(user);
+        if(!team) return { step: -1 };
+
+        return {
+            step: 2,
+            data: {
+                started: true,
+                stage_closed: true,
+                team_name: team.name,
+            }
+        }
+    }
+
+    async function stage_semifinalResultsAnnounced(user) {
+        const team = await userHasEligibleTeam(user);
+        if(!team) return { step: -1 };
+
+        return {
+            step: 3,
+            data: {
+                qualified: team.semifinal_qualified === true,
+                started: false,
+                stage_closed: false,
+                team_name: team.name
+            }
+        }
+    }
+
+    async function stage_semifinalCaseReleased(user) {
+        const team = await userHasEligibleTeam(user);
+        if(!team) return { step: -1 };
+
+        if(!team.semifinal_qualified) {
+            return {
+                step: 3,
+                data: {
+                    qualified: team.semifinal_qualified === true,
+                    started: false,
+                    stage_closed: false,
+                    team_name: team.name
+                }
+            }
+        }
+
+        return {
+            step: 3,
+            data: {
+                qualified: team.semifinal_qualified === true,
+                started: true,
+                stage_closed: false,
+                team_name: team.name,
+                case_url: "http://files.bistleague.com/public/semifinal.pdf",
+                submission: {
+                    ...await getSemifinalSubmissionData(team),
+                    closed: false
+                }
+            }
+        }
+    }
+
+    async function stage_semifinalSubmissionDeadline(user) {
+        const team = await userHasEligibleTeam(user);
+        if(!team) return { step: -1 };
+
+        if(!team.semifinal_qualified) {
+            return {
+                step: 3,
+                data: {
+                    qualified: team.semifinal_qualified === true,
+                    started: false,
+                    stage_closed: false,
+                    team_name: team.name
+                }
+            }
+        }
+
+        return {
+            step: 3,
+            data: {
+                qualified: team.semifinal_qualified === true,
+                started: true,
+                stage_closed: false,
+                team_name: team.name,
+                case_url: "http://files.bistleague.com/public/semifinal.pdf",
+                submission: {
+                    ...await getSemifinalSubmissionData(team),
+                    closed: true
+                }
+            }
+        }
+    }
+
+    async function stage_semifinalStageClosed(user) {
+        const team = await userHasEligibleTeam(user);
+        if(!team) return { step: -1 };
+
+        if(!team.semifinal_qualified) {
+            return {
+                step: 3,
+                data: {
+                    qualified: team.semifinal_qualified === true,
+                    started: false,
+                    stage_closed: false,
+                    team_name: team.name
+                }
+            }
+        }
+
+        return {
+            step: 3,
+            data: {
+                qualified: team.semifinal_qualified === true,
+                started: true,
+                stage_closed: true,
+                team_name: team.name,
+            }
+        }
+    }
+
+    async function stage_finalResultsAnnounced(user) {
+        const team = await userHasEligibleTeam(user);
+        if(!team) return { step: -1 };
+
+        if(!team.semifinal_qualified) {
+            return {
+                step: 3,
+                data: {
+                    qualified: team.semifinal_qualified === true,
+                    started: false,
+                    stage_closed: false,
+                    team_name: team.name
+                }
+            }
+        }
+
+        return {
+            step: 4,
+            data: {
+                qualified: team.final_qualified === true,
+                started: false,
+                stage_closed: false,
+                team_name: team.name
+            }
+        }
+    }
+
+    async function getPreliminarySubmissionData(team) {
+        return {
+            uploaded: false,    // TODO change
+            file_url: "http://files.bistleague.com/v/py/CASE.pptx", // TODO change
+            filename: "CASE.pptx",  // TODO change
+            last_submitted_by: "Muhammad Aditya Hilmy", // TODO change
+            last_submitted_at: 1554785117000    // TODO change
+        }
+    }
+
+    async function getSemifinalSubmissionData(team) {
+        return {
+            uploaded: false,    // TODO change
+            file_url: "http://files.bistleague.com/v/py/CASE.pptx", // TODO change
+            filename: "CASE.pptx",  // TODO change
+            last_submitted_by: "Muhammad Aditya Hilmy", // TODO change
+            last_submitted_at: 1554785117000    // TODO change
+        }
+    }
+
+    async function userHasEligibleTeam(user) {
+        // Get team
+        const teamId = user.team_id;
+
+        if(!teamId) {
+            return null;
+        }
+
+        const team = await getTeamById(teamId);
+        return isTeamDataComplete(team) ? team : null;
+    }
+
+    function isTeamDataComplete(team) {
+        return team.proof_of_payment_file_id && team.name && team.university;
     }
 
     async function findUniqueInviteCode() {
