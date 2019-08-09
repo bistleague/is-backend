@@ -1,4 +1,4 @@
-const { saveTeam, updateTeam, getTeamById, getTeamByInviteCode, deleteTeam } = require("../../datastore/team");
+const { saveTeam, updateTeam, getTeamById, getTeamByInviteCode, getTeamByName, deleteTeam } = require("../../datastore/team");
 const { DocumentStatus } = require("../../model/DocumentStatus");
 const { Team, TeamStage } = require("../../model/Team");
 const { generateInviteCode } = require("../../helper");
@@ -11,6 +11,14 @@ module.exports = function (fastify) {
     fastify.post('/team', async (req, reply) => {
         try {
             const userId = req.user.sub;
+            const teamName = req.body.name;
+            const university = req.body.university;
+
+            if(!teamName || !university) {
+                reply.code(400);
+                return {error: "Team name and university cannot be empty"};
+            }
+
             let user = await usersRepository.get(userId);
             if(!user) {
                 reply.code(401);
@@ -22,10 +30,19 @@ module.exports = function (fastify) {
                 return {error: "User already has a team"};
             }
 
+            // Check team name exists
+            const checkedTeam = await getTeamByName(teamName);
+            if(checkedTeam) {
+                reply.code(400);
+                return {error: "Team name is taken"};
+            }
+
             const team = {
                 stage: TeamStage.STAGE_REGISTERED,
                 invite_code: await findUniqueInviteCode(),
-                created_time: Date.now()
+                created_time: Date.now(),
+                name: teamName,
+                university: university
             };
 
             const savedTeam = await saveTeam(team);
