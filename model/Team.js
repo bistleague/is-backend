@@ -22,4 +22,18 @@ export function Team() {
     this.proof_of_payment_verified = false;
     this.invite_code = undefined;
     this.created_time = Date.now();
+
+    // Preliminary submission
+    this.preliminary_submission_file_id = undefined;
+    this.preliminary_submission_user_id = undefined;
+    this.preliminary_submission_last_submitted = undefined;
+
+    // Semifinal submission
+    this.semifinal_qualified = undefined;
+    this.semifinal_submission_file_id = undefined;
+    this.semifinal_submission_user_id = undefined;
+    this.semifinal_submission_last_submitted = undefined;
+
+    // Final qualification
+    this.final_qualified = undefined;
 }
