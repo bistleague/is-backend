@@ -53,7 +53,18 @@ export async function updateTeam(teamId, team) {
         throw "Team stage invalid";
     }
 
-    if(team.name) dbTeam.name = team.name;
+    if(team.name) {
+        // Check team name exists
+        const checkedTeam = await getTeamByName(team.name);
+        if(checkedTeam) {
+            if(checkedTeam.team_id !== teamId) {
+                throw "Team name is taken";
+            }
+        }
+
+        dbTeam.name = team.name;
+    }
+
     if(team.university) dbTeam.university = team.university;
     if(team.stage) dbTeam.stage = team.stage;
     if(team.invite_code) dbTeam.invite_code = team.invite_code;
@@ -85,6 +96,16 @@ export async function getTeamByInviteCode(inviteCode) {
 
     const query = db.createQuery(ENTITY_NAME)
         .filter('invite_code', '=', inviteCode);
+
+    const [teams] = await db.runQuery(query);
+    return teams[0];
+}
+
+export async function getTeamByName(teamName) {
+    if(!teamName) return null;
+
+    const query = db.createQuery(ENTITY_NAME)
+        .filter('name', '=', teamName);
 
     const [teams] = await db.runQuery(query);
     return teams[0];
