@@ -227,7 +227,8 @@ module.exports = function (fastify) {
 
             await updateTeam(teamId, {
                 proof_of_payment_file_id: dbFile.id,
-                proof_of_payment_verified: false
+                proof_of_payment_verified: false,
+                proof_of_payment_rejected: false
             });
 
             reply.code(200).send();
