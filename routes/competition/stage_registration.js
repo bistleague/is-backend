@@ -75,9 +75,21 @@ export async function stage_registrationOpened(user) {
                 uploaded: !(!team.proof_of_payment_file_id),
                 url: (proofOfPaymentFile) ? proofOfPaymentFile.url : undefined,
                 filename: (proofOfPaymentFile) ? proofOfPaymentFile.filename.split('/').pop() : undefined,
-                status: "PENDING"   // TODO status
+                status: getPaymentStatus(team)
             },
             team_members: teamMembers
+        }
+    }
+}
+
+function getPaymentStatus(team) {
+    if (team.proof_of_payment_verified) {
+        return "VERIFIED";
+    } else {
+        if(team.proof_of_payment_rejected) {
+            return "REJECTED";
+        } else {
+            return "PENDING";
         }
     }
 }

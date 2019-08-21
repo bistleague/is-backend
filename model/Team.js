@@ -20,6 +20,7 @@ export function Team() {
     this.stage = TeamStage.STAGE_REGISTERED;
     this.proof_of_payment_file_id = undefined;
     this.proof_of_payment_verified = false;
+    this.proof_of_payment_rejected = false;
     this.invite_code = undefined;
     this.created_time = Date.now();
 

@@ -4,7 +4,10 @@
   "description": "Bistleague dashboard backend",
   "main": "main.js",
   "scripts": {
-    "start": "node -r esm main.js"
+    "start": "node -r esm main.js",
+    "compress-secrets": "tar cvf secrets.tar app-prod.yaml app-staging.yaml bistleague-beta-deployment.json bistleague-prod-deployment.json bistleague-client-staging.json bistleague-client-prod.json",
+    "encrypt-secrets": "travis encrypt-file secrets.tar",
+    "prepare-secrets": "npm run compress-secrets && npm run encrypt-secrets"
   },
   "repository": {
     "type": "git",
