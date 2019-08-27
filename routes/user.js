@@ -78,7 +78,7 @@ module.exports = function (fastify, opts, next) {
             // For now, ignore email change.
 
             // Update to database
-            await usersRepository.update(userId, user);
+            await usersRepository.update(user);
 
             return {success: true, user: user};
 
@@ -123,7 +123,7 @@ module.exports = function (fastify, opts, next) {
             user.password_hash = bcrypt.hashSync(newpass, usersRepository.HASH_SALT);
 
             // Update to database
-            await usersRepository.update(userId, user);
+            await usersRepository.update(user);
 
             return {success: true};
         } catch (e) {

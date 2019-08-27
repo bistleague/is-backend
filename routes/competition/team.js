@@ -48,7 +48,7 @@ module.exports = function (fastify) {
             const savedTeam = await saveTeam(team);
 
             user.team_id = savedTeam.team_id;
-            await usersRepository.update(userId, user);
+            await usersRepository.update(user);
 
             return savedTeam;
         } catch (e) {
@@ -137,7 +137,7 @@ module.exports = function (fastify) {
             }
 
             user.team_id = team.team_id;
-            await usersRepository.update(userId, user);
+            await usersRepository.update(user);
 
             return team;
         } catch (e) {
@@ -183,7 +183,7 @@ module.exports = function (fastify) {
             }
 
             targetUser.team_id = null;
-            await usersRepository.update(targetUser.id, targetUser);
+            await usersRepository.update(targetUser);
 
             // Check if team has no more user
             const users = await usersRepository.getByTeamId(teamId);
@@ -227,7 +227,8 @@ module.exports = function (fastify) {
 
             await updateTeam(teamId, {
                 proof_of_payment_file_id: dbFile.id,
-                proof_of_payment_verified: false
+                proof_of_payment_verified: false,
+                proof_of_payment_rejected: false
             });
 
             reply.code(200).send();
@@ -314,7 +315,7 @@ module.exports = function (fastify) {
 
             targetUser.student_id_file_id = dbFile.id;
             targetUser.student_id_status = DocumentStatus.PENDING;
-            await usersRepository.update(targetUser.id, targetUser);
+            await usersRepository.update(targetUser);
 
             reply.code(200).send();
         }
@@ -364,7 +365,7 @@ module.exports = function (fastify) {
             targetUser.student_id_file_id = null;
             targetUser.student_id_status = DocumentStatus.NOT_UPLOADED;
 
-            await usersRepository.update(targetUserId, targetUser);
+            await usersRepository.update(targetUser);
 
             reply.code(200).send({success: true});
         }
@@ -409,7 +410,7 @@ module.exports = function (fastify) {
 
             targetUser.poe_file_id = dbFile.id;
             targetUser.poe_status = DocumentStatus.PENDING;
-            await usersRepository.update(targetUser.id, targetUser);
+            await usersRepository.update(targetUser);
 
             reply.code(200).send();
         }
@@ -459,7 +460,7 @@ module.exports = function (fastify) {
             targetUser.poe_file_id = null;
             targetUser.poe_status = DocumentStatus.NOT_UPLOADED;
 
-            await usersRepository.update(targetUserId, targetUser);
+            await usersRepository.update(targetUser);
 
             reply.code(200).send({success: true});
         }

@@ -154,8 +154,7 @@ module.exports = function (fastify, opts, next) {
             user.password_hash = bcrypt.hashSync(password, usersRepository.HASH_SALT);
 
             // Update to database
-            const userId = user[db.KEY].name;
-            await usersRepository.update(userId, user);
+            await usersRepository.update(user);
 
             return {success: true};
         } catch (e) {
@@ -202,8 +201,7 @@ module.exports = function (fastify, opts, next) {
             user.email_verified = true;
 
             // Update to database
-            const userId = user[db.KEY].name;
-            await usersRepository.update(userId, user);
+            await usersRepository.update(user);
 
             return {success: true};
         } catch (e) {

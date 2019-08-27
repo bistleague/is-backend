@@ -70,6 +70,7 @@ export async function updateTeam(teamId, team) {
     if(team.invite_code) dbTeam.invite_code = team.invite_code;
     if(team.proof_of_payment_file_id !== undefined) dbTeam.proof_of_payment_file_id = team.proof_of_payment_file_id;
     if(team.proof_of_payment_verified !== undefined) dbTeam.proof_of_payment_verified = team.proof_of_payment_verified === true;
+    if(team.proof_of_payment_rejected !== undefined) dbTeam.proof_of_payment_rejected = team.proof_of_payment_rejected === true;
 
     const key = db.key([ENTITY_NAME, teamId]);
 
@@ -109,6 +110,13 @@ export async function getTeamByName(teamName) {
 
     const [teams] = await db.runQuery(query);
     return teams[0];
+}
+
+export async function getAllTeams() {
+    const query = db.createQuery(ENTITY_NAME);
+
+    const [teams] = await db.runQuery(query);
+    return teams;
 }
 
 function isStageValid(stage) {
