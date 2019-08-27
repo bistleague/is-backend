@@ -95,10 +95,10 @@ exports.add = async function(user) {
 /**
  * Update a user by userId
  */
-exports.update = async function(id, user) {
+exports.update = async function(user) {
     // Prevent email duplicate
-    let email = user.email;
-    if(!email) throw "Invalid user object";
+    const email = user.email;
+    if(!email || !user.id) throw "Invalid user object";
 
     // Check if user with the same email exists
     let checkUser = await exports.getByEmail(email);
@@ -109,7 +109,7 @@ exports.update = async function(id, user) {
         throw "User with such email exists";
     }
 
-    const key = db.key([ENTITY_NAME, id]);
+    const key = db.key([ENTITY_NAME, user.id]);
 
     const entity = {
         key: key,
