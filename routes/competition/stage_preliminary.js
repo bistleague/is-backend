@@ -1,12 +1,18 @@
+import {ConfigKeys} from "../../model/Config";
+import {getConfig} from "../../datastore/config";
+
 const usersRepository = require('../../datastore/users');
 const filesRepository = require('../../datastore/files');
 const File = require('../../model/File');
 const { upload, deleteFile } = require('../../datastore/file_storage');
-const { userHasEligibleTeam } = require('./commons');
+const { getEligibleTeam } = require('./commons');
 
 export async function stage_preliminaryCaseReleased(user) {
-    const team = await userHasEligibleTeam(user);
+    const team = await getEligibleTeam(user);
     if(!team) return { step: -1 };
+
+    // Get case URL
+    const caseUrl = await getConfig(ConfigKeys.PRELIMINARY_CASE_URL) || "http://example.com";
 
     return {
         step: 2,
@@ -14,9 +20,9 @@ export async function stage_preliminaryCaseReleased(user) {
             started: true,
             stage_closed: false,
             team_name: team.name,
-            case_url: "http://files.bistleague.com/public/preliminary.pdf",
+            case_url: caseUrl,
             submission: {
-                ...await getPreliminarySubmissionData(),
+                ...await getPreliminarySubmissionData(team),
                 closed: false,
             }
         }
@@ -24,8 +30,11 @@ export async function stage_preliminaryCaseReleased(user) {
 }
 
 export async function stage_preliminarySubmissionDeadline(user) {
-    const team = await userHasEligibleTeam(user);
+    const team = await getEligibleTeam(user);
     if(!team) return { step: -1 };
+
+    // Get case URL
+    const caseUrl = await getConfig(ConfigKeys.PRELIMINARY_CASE_URL) || "http://example.com";
 
     return {
         step: 2,
@@ -33,7 +42,7 @@ export async function stage_preliminarySubmissionDeadline(user) {
             started: true,
             stage_closed: false,
             team_name: team.name,
-            case_url: "http://files.bistleague.com/public/preliminary.pdf",
+            case_url: caseUrl,
             submission: {
                 ...await getPreliminarySubmissionData(team),
                 closed: true,
@@ -43,7 +52,7 @@ export async function stage_preliminarySubmissionDeadline(user) {
 }
 
 export async function stage_preliminaryStageClosed(user) {
-    const team = await userHasEligibleTeam(user);
+    const team = await getEligibleTeam(user);
     if(!team) return { step: -1 };
 
     return {
@@ -57,11 +66,21 @@ export async function stage_preliminaryStageClosed(user) {
 }
 
 async function getPreliminarySubmissionData(team) {
+    const fileId = team.preliminary_submission_file_id;
+
+    if(!fileId) {
+        return {uploaded: false};
+    }
+
+    const file = await filesRepository.get(fileId);
+    const lastSubmitterUserId = team.preliminary_submission_user_id;
+    const lastSubmitter = await usersRepository.get(lastSubmitterUserId);
+
     return {
-        uploaded: false,    // TODO change
-        file_url: "http://files.bistleague.com/v/py/CASE.pptx", // TODO change
-        filename: "CASE.pptx",  // TODO change
-        last_submitted_by: "Muhammad Aditya Hilmy", // TODO change
-        last_submitted_at: 1554785117000    // TODO change
+        uploaded: true,
+        file_url: file.url,
+        filename: file.filename.split('/').pop(),
+        last_submitted_by: lastSubmitter.name,
+        last_submitted_at: team.preliminary_submission_last_submitted
     }
 }

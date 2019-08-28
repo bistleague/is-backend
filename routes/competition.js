@@ -15,7 +15,9 @@ const usersRepository = require('../datastore/users');
 
 
 module.exports = function (fastify, opts, next) {
-    fastify.addHook('preHandler', function (req, reply) {
+    fastify.addHook('preHandler', async function (req, reply) {
+        req.competition_stage = await getConfig(ConfigKeys.COMPETITION_STAGE);
+
         return req.jwtVerify()
     });
 
@@ -27,7 +29,7 @@ module.exports = function (fastify, opts, next) {
             return {error: "Invalid user"};
         }
 
-        const stageConfig = await getConfig(ConfigKeys.COMPETITION_STAGE);
+        const stageConfig = req.competition_stage;
 
         switch(stageConfig) {
             case (CompetitionStage.REGISTRATION_OPENED):

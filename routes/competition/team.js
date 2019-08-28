@@ -1,3 +1,4 @@
+
 const { saveTeam, updateTeam, getTeamById, getTeamByInviteCode, getTeamByName, deleteTeam } = require("../../datastore/team");
 const { DocumentStatus } = require("../../model/DocumentStatus");
 const { Team, TeamStage } = require("../../model/Team");
@@ -6,6 +7,7 @@ const usersRepository = require('../../datastore/users');
 const filesRepository = require('../../datastore/files');
 const File = require('../../model/File');
 const { upload, deleteFile } = require('../../datastore/file_storage');
+const { CompetitionStage, AllowedSubmissionStages, AllowedSubmissionEditStages } = require("../../model/CompetitionStage");
 
 module.exports = function (fastify) {
     fastify.post('/team', async (req, reply) => {
@@ -461,6 +463,136 @@ module.exports = function (fastify) {
             targetUser.poe_status = DocumentStatus.NOT_UPLOADED;
 
             await usersRepository.update(targetUser);
+
+            reply.code(200).send({success: true});
+        }
+    });
+
+    fastify.route({
+        method: 'POST',
+        url: '/team/submission',
+        preHandler: upload.single('file'),
+        handler: async function(req, reply) {
+            const stage = req.competition_stage;
+
+            if(!AllowedSubmissionStages.includes(stage)) {
+                reply.code(401);
+                return {error: "Submission is not allowed"};
+            }
+
+            const userId = req.user.sub;
+            const user = await usersRepository.get(userId);
+            if(!user) {
+                reply.code(401);
+                return {error: "Invalid user"};
+            }
+
+            const teamId = user.team_id;
+            if(!teamId) {
+                reply.code(400);
+                return {error: "User is not in a team"};
+            }
+
+            const team = await getTeamById(teamId);
+            if(!team) {
+                reply.code(404);
+                return {error: "Team not found"};
+            }
+
+            const file = req.file;
+
+            // Add to Database
+            const url = `${process.env.GCP_STORAGE_BASE_URL}/${file.filename}`;
+            const dbFile = await filesRepository.add(new File('', file.filename, url, Date.now()));
+
+            // Update team
+            switch (stage) {
+                case CompetitionStage.PRELIMINARY_CASE_RELEASED:
+                case CompetitionStage.PRELIMINARY_SUBMISSION_DEADLINE:
+                    if(team.preliminary_submission_file_id) {
+                        reply.code(400);
+                        return {error: "Submission is already submitted"};
+                    }
+
+                    await updateTeam(teamId, {
+                        preliminary_submission_file_id: dbFile.id,
+                        preliminary_submission_last_submitted: Date.now(),
+                        preliminary_submission_user_id: userId
+                    });
+                    break;
+                case CompetitionStage.SEMIFINAL_CASE_RELEASED:
+                case CompetitionStage.SEMIFINAL_SUBMISSION_DEADLINE:
+                    if(team.semifinal_submission_file_id) {
+                        reply.code(400);
+                        return {error: "Submission is already submitted"};
+                    }
+
+                    await updateTeam(teamId, {
+                        semifinal_submission_file_id: dbFile.id,
+                        semifinal_submission_last_submitted: Date.now(),
+                        semifinal_submission_user_id: userId
+                    });
+                    break;
+            }
+
+            reply.code(200).send();
+        }
+    });
+
+    fastify.route({
+        method: 'DELETE',
+        url: '/team/submission',
+        handler: async function(req, reply) {
+            const stage = req.competition_stage;
+
+            if(!AllowedSubmissionEditStages.includes(stage)) {
+                reply.code(401);
+                return {error: "Submission deletion is not allowed"};
+            }
+
+            const userId = req.user.sub;
+            const user = await usersRepository.get(userId);
+            if(!user) {
+                reply.code(401);
+                return {error: "Invalid user"};
+            }
+
+            // Check if user is in a team
+            const teamId = user.team_id;
+            if(!teamId) {
+                reply.code(400);
+                return {error: "User is not in a team"};
+            }
+
+            const team = await getTeamById(teamId);
+            if(!team) {
+                reply.code(404);
+                return {error: "Team not found"};
+            }
+
+            const fileId = stage === CompetitionStage.PRELIMINARY_CASE_RELEASED
+                ? team.preliminary_submission_file_id
+                : team.semifinal_submission_file_id;
+
+            if(!fileId) {
+                reply.code(400);
+                return {error: "Submission is not yet uploaded"};
+            }
+
+            const file = await filesRepository.get(fileId);
+            deleteFile(file.filename);
+
+            await filesRepository.delete(fileId);
+
+            if(stage === CompetitionStage.PRELIMINARY_CASE_RELEASED) {
+                await updateTeam(teamId, {
+                    preliminary_submission_file_id: null
+                });
+            } else {
+                await updateTeam(teamId, {
+                    semifinal_submission_file_id: null
+                });
+            }
 
             reply.code(200).send({success: true});
         }

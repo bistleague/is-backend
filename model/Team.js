@@ -37,4 +37,7 @@ export function Team() {
 
     // Final qualification
     this.final_qualified = undefined;
+
+    // Overrides
+    this.registration_eligibility_override = false;
 }
