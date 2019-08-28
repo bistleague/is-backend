@@ -72,6 +72,14 @@ export async function updateTeam(teamId, team) {
     if(team.proof_of_payment_verified !== undefined) dbTeam.proof_of_payment_verified = team.proof_of_payment_verified === true;
     if(team.proof_of_payment_rejected !== undefined) dbTeam.proof_of_payment_rejected = team.proof_of_payment_rejected === true;
 
+    if(team.preliminary_submission_file_id !== undefined) dbTeam.preliminary_submission_file_id = team.preliminary_submission_file_id;
+    if(team.preliminary_submission_last_submitted !== undefined) dbTeam.preliminary_submission_last_submitted = team.preliminary_submission_last_submitted;
+    if(team.preliminary_submission_user_id !== undefined) dbTeam.preliminary_submission_user_id = team.preliminary_submission_user_id;
+
+    if(team.semifinal_submission_file_id !== undefined) dbTeam.semifinal_submission_file_id = team.semifinal_submission_file_id;
+    if(team.semifinal_submission_last_submitted !== undefined) dbTeam.semifinal_submission_last_submitted = team.semifinal_submission_last_submitted;
+    if(team.semifinal_submission_user_id !== undefined) dbTeam.semifinal_submission_user_id = team.semifinal_submission_user_id;
+
     const key = db.key([ENTITY_NAME, teamId]);
 
     const entity = {
