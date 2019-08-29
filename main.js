@@ -26,6 +26,7 @@ fastify.register(require('./routes/user'), { prefix: '/v1/user', preValidation: 
 fastify.register(require('./routes/competition'), { prefix: '/v1/competition', preValidation: [fastify.authenticate] });
 
 fastify.register(require('./routes/admin/treasurer'), { prefix: '/v1/admin/treasurer' });
+fastify.register(require('./routes/admin/competition'), { prefix: '/v1/admin/competition' });
 
 // Run the server!
 const start = async () => {
