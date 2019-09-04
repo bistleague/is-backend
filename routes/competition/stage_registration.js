@@ -2,7 +2,7 @@ const usersRepository = require('../../datastore/users');
 const filesRepository = require('../../datastore/files');
 const File = require('../../model/File');
 const { upload, deleteFile } = require('../../datastore/file_storage');
-const { userHasEligibleTeam } = require('./commons');
+const { getEligibleTeam } = require('./commons');
 const { getTeamById } = require('../../datastore/team');
 
 export async function stage_registrationOpened(user) {
@@ -95,7 +95,7 @@ function getPaymentStatus(team) {
 }
 
 export async function stage_registrationClosed(user) {
-    const team = await userHasEligibleTeam(user);
+    const team = await getEligibleTeam(user);
     if(!team) return { step: -1 };
 
     return {

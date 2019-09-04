@@ -10,3 +10,15 @@ export const CompetitionStage = {
     SEMIFINAL_STAGE_CLOSED: 8,
     FINAL_RESULTS_ANNOUNCED: 9
 };
+
+export const AllowedSubmissionStages = [
+    CompetitionStage.SEMIFINAL_CASE_RELEASED,
+    CompetitionStage.SEMIFINAL_SUBMISSION_DEADLINE,
+    CompetitionStage.PRELIMINARY_CASE_RELEASED,
+    CompetitionStage.PRELIMINARY_SUBMISSION_DEADLINE
+];
+
+export const AllowedSubmissionEditStages = [
+    CompetitionStage.SEMIFINAL_CASE_RELEASED,
+    CompetitionStage.PRELIMINARY_CASE_RELEASED
+];

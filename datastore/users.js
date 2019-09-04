@@ -128,6 +128,18 @@ exports.delete = async function(id) {
 };
 
 /**
+ * Get all users
+ */
+exports.getAllUsers = async function() {
+    const query = db.createQuery(ENTITY_NAME).order('created_time', {
+      descending: false,
+    });
+
+    const [users] = await db.runQuery(query);
+    return users;
+};
+
+/**
  * Initialize users
  */
 async function init() {
