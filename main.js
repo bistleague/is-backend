@@ -26,9 +26,8 @@ fastify.register(require('./routes/user'), { prefix: '/v1/user', preValidation: 
 fastify.register(require('./routes/competition'), { prefix: '/v1/competition', preValidation: [fastify.authenticate] });
 
 fastify.register(require('./routes/admin/treasurer'), { prefix: '/v1/admin/treasurer' });
-fastify.register(require('./routes/admin/student_id'), { prefix: '/v1/admin/student-id' });
 fastify.register(require('./routes/admin/competition'), { prefix: '/v1/admin/competition' });
-fastify.register(require('./routes/admin/proof_of_payment'), { prefix: '/v1/admin/proof-of-payment' });
+fastify.register(require('./routes/admin/documents'), { prefix: '/v1/admin/documents' });
 
 // Run the server!
 const start = async () => {
