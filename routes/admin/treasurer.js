@@ -33,7 +33,11 @@ module.exports = function (fastify, opts, next) {
                     const file = await filesRepository.get(team.proof_of_payment_file_id);
                     processedTeams.push({
                         name: team.name,
-                        proof_of_payment: file.url
+                        proof_of_payment: file.url,
+                        team_id: team.team_id,
+                        proof_of_payment_verified: team.proof_of_payment_verified,
+                        proof_of_payment_rejected: team.proof_of_payment_rejected,
+                        university: team.university
                     })
                 }
             }
