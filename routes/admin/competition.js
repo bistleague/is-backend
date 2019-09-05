@@ -57,5 +57,93 @@ module.exports = function (fastify, opts, next) {
         return processedTeams;
     });
 
+    /**
+     * Qualify team to semifinal
+     */
+    fastify.post('/semifinal/qualified', async (req, reply) => {
+        try {
+            const teamId = req.body.team_id;
+            const team = await teamsRepository.getTeamById(teamId);
+
+            if(!team) {
+                reply.code(404);
+                return {error: 'Team not found'};
+            }
+
+            team.semifinal_qualified = true;
+
+            await teamsRepository.updateTeam(teamId, team);
+            return team;
+        } catch (e) {
+            reply.code(500);
+            console.log(e);
+            return {error: e.toString()}
+        }
+    });
+    fastify.post('/semifinal/not-qualified', async (req, reply) => {
+        try {
+            const teamId = req.body.team_id;
+            const team = await teamsRepository.getTeamById(teamId);
+
+            if(!team) {
+                reply.code(404);
+                return {error: 'Team not found'};
+            }
+
+            team.semifinal_qualified = false;
+
+            await teamsRepository.updateTeam(teamId, team);
+            return team;
+        } catch (e) {
+            reply.code(500);
+            console.log(e);
+            return {error: e.toString()}
+        }
+    });
+
+    /**
+     * Qualify team to final
+     */
+    fastify.post('/final/qualified', async (req, reply) => {
+        try {
+            const teamId = req.body.team_id;
+            const team = await teamsRepository.getTeamById(teamId);
+
+            if(!team) {
+                reply.code(404);
+                return {error: 'Team not found'};
+            }
+
+            team.final_qualified = true;
+
+            await teamsRepository.updateTeam(teamId, team);
+            return team;
+        } catch (e) {
+            reply.code(500);
+            console.log(e);
+            return {error: e.toString()}
+        }
+    });
+    fastify.post('/final/not-qualified', async (req, reply) => {
+        try {
+            const teamId = req.body.team_id;
+            const team = await teamsRepository.getTeamById(teamId);
+
+            if(!team) {
+                reply.code(404);
+                return {error: 'Team not found'};
+            }
+
+            team.final_qualified = false;
+
+            await teamsRepository.updateTeam(teamId, team);
+            return team;
+        } catch (e) {
+            reply.code(500);
+            console.log(e);
+            return {error: e.toString()}
+        }
+    });
+
     next();
 };
